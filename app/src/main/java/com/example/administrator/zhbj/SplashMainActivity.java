@@ -53,7 +53,7 @@ public class SplashMainActivity extends AppCompatActivity {
                 }else{
                     Intent intent = new Intent(SplashMainActivity.this, MainActivity.class);
                     startActivity(intent);
-                    //// TODO: 2017/3/1 写到这里 
+                    //// TODO: 2017/3/1 写到这里
                 }
             }
 
