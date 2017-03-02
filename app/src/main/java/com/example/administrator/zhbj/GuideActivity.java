@@ -1,14 +1,19 @@
 package com.example.administrator.zhbj;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+
+import com.example.administrator.zhbj.Utils.PrefUtils;
 
 import java.util.ArrayList;
 
@@ -22,7 +27,8 @@ public class GuideActivity extends AppCompatActivity {
     private int[] images = new int[]{R.mipmap.guide_1, R.mipmap.guide_2, R.mipmap.guide_3};
     private LinearLayout llPoint;
     private ArrayList<ImageView> mImages;
-
+    private ImageView mPoint;
+    private int mPointDis;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,15 +54,57 @@ public class GuideActivity extends AppCompatActivity {
             point.setLayoutParams(params);
             llPoint.addView(point);
         }
-        ////TODO 没有设置适配器
+        vpGuide.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                int magin = (int) (mPointDis * positionOffset) + position * mPointDis;
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mPoint.getLayoutParams();
+                params.leftMargin = magin;
+                mPoint.setLayoutParams(params);
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                if (position == mImages.size() - 1) {
+                    btnStart.setVisibility(View.VISIBLE);
+                } else {
+                    btnStart.setVisibility(View.INVISIBLE);
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+        mPoint.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                mPoint.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+
+                mPointDis = llPoint.getChildAt(1).getLeft() - llPoint.getChildAt(0).getLeft();
+                System.out.println("原点距离" + mPointDis);
+            }
+        });
+
 
     }
 
     private void initViews() {
         vpGuide = (ViewPager) findViewById(R.id.vp_guide);
         btnStart = (Button) findViewById(R.id.btn_start);
+        btnStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PrefUtils.setBoolean(getApplicationContext(),"is_first_enter",false);
+                startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                finish();
+                ////Todo 写完新手引导页面
+            }
+        });
         llPoint = (LinearLayout) findViewById(R.id.ll_point);
-        ////TODO 还没找到小红点
+        mPoint = (ImageView) findViewById(R.id.iv_red_point);
+
     }
 
     class GuideAdapter extends PagerAdapter {
