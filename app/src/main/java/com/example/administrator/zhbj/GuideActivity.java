@@ -30,6 +30,7 @@ public class GuideActivity extends AppCompatActivity {
         setContentView(R.layout.activity_guide);
         initViews();
         initDate();
+        vpGuide.setAdapter(new GuideAdapter());
     }
 
     public void initDate() {
@@ -38,14 +39,24 @@ public class GuideActivity extends AppCompatActivity {
             ImageView view = new ImageView(this);
             view.setBackgroundResource(images[i]);
             mImages.add(view);
-
+            ImageView point = new ImageView(this);
+            point.setImageResource(R.drawable.shape_point_gary);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            if (i > 0) {
+                params.leftMargin = 10;
+            }
+            point.setLayoutParams(params);
+            llPoint.addView(point);
         }
+        ////TODO 没有设置适配器
+
     }
 
     private void initViews() {
         vpGuide = (ViewPager) findViewById(R.id.vp_guide);
         btnStart = (Button) findViewById(R.id.btn_start);
         llPoint = (LinearLayout) findViewById(R.id.ll_point);
+        ////TODO 还没找到小红点
     }
 
     class GuideAdapter extends PagerAdapter {

@@ -16,14 +16,23 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="60dp"
         android:text="开始体验" />
+
+    <RelativeLayout
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
     <LinearLayout
         android:id="@+id/ll_point"
         android:orientation="horizontal"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="38dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
-
     </LinearLayout>
+<ImageView
+    android:src="@drawable/shape_point_red"
+    android:id="@+id/iv_red_point"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />
+    </RelativeLayout>
 </RelativeLayout>
