@@ -86,7 +86,7 @@ public class NewsPager extends BasePager {
         LeftFragment leftFragment = mainUI.getLeftFragment();
         leftFragment.setMenuDate(mNewsData.data);
         mMenuDetailPagers = new ArrayList<>();
-        mMenuDetailPagers.add(new NewsMenuDetailPager(mActivity));
+        mMenuDetailPagers.add(new NewsMenuDetailPager(mActivity,mNewsData.data.get(0).children));
         mMenuDetailPagers.add(new TopicMenuDetailPager(mActivity));
         mMenuDetailPagers.add(new PhotosMenuDetailPager(mActivity));
         mMenuDetailPagers.add(new InteractMenuDetailPager(mActivity));
