@@ -130,4 +130,9 @@ public class MainFragment extends BaseFragment {
             container.removeView((View) object);
         }
     }
+
+    public NewsPager  getNewsCnterPager(){
+        NewsPager pager = (NewsPager) mPagers.get(1);
+        return pager;
+    }
 }

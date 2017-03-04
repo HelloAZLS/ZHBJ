@@ -6,7 +6,9 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.administrator.zhbj.MainActivity;
 import com.example.administrator.zhbj.R;
+import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 /**
  * Created by Administrator on 2017/3/3.
@@ -30,10 +32,19 @@ public class BasePager {
         tvTitle = (TextView) view.findViewById(R.id.tv_base_title);
         btnMenu = (ImageView) view.findViewById(R.id.btn_menu);
         flContent = (FrameLayout) view.findViewById(R.id.fl_content);
-
+btnMenu.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        toggle();
+    }
+});
         return view;
     }
-
+    private void toggle() {
+        MainActivity mainUI = (MainActivity) mActivity;
+        SlidingMenu slidingMenu = mainUI.getSlidingMenu();
+        slidingMenu.toggle();
+    }
     public void initDate() {
 
     }
