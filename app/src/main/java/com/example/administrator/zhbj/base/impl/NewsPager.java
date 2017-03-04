@@ -3,6 +3,7 @@ package com.example.administrator.zhbj.base.impl;
 import android.app.Activity;
 import android.graphics.Color;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.TextView;
 
 import com.example.administrator.zhbj.base.BasePager;
@@ -25,5 +26,6 @@ public class NewsPager extends BasePager {
         view.setGravity(Gravity.CENTER);
         flContent.addView(view);
         tvTitle.setText("新闻中心");
+        btnMenu.setVisibility(View.VISIBLE);
     }
 }

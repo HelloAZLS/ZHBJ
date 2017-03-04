@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioGroup;
 
+import com.example.administrator.zhbj.MainActivity;
 import com.example.administrator.zhbj.R;
 import com.example.administrator.zhbj.base.BasePager;
 import com.example.administrator.zhbj.base.impl.GovPager;
@@ -14,6 +15,7 @@ import com.example.administrator.zhbj.base.impl.NewsPager;
 import com.example.administrator.zhbj.base.impl.SettingPager;
 import com.example.administrator.zhbj.base.impl.SmartPager;
 import com.example.administrator.zhbj.view.NoScrollViewPager;
+import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 import java.util.ArrayList;
 
@@ -61,6 +63,11 @@ public class MainFragment extends BaseFragment {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 mPagers.get(position).initDate();
+                if (position==0||position==mPagers.size()-1){
+                    setSlidingEnable(false);
+                }else{
+                    setSlidingEnable(true);
+                }
             }
 
             @Override
@@ -75,6 +82,18 @@ public class MainFragment extends BaseFragment {
         });
 
         mPagers.get(0).initDate();
+        setSlidingEnable(false );
+    }
+
+    private void setSlidingEnable(boolean b) {
+        MainActivity mainUI = (MainActivity) mActivity;
+        SlidingMenu slidingMenu = mainUI.getSlidingMenu();
+       if (b){
+           slidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
+
+       }else {
+           slidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_NONE);
+       }
     }
 
     @Override
