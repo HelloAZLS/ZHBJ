@@ -17,6 +17,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
 }
 
 dependencies {
@@ -31,4 +37,5 @@ dependencies {
     android {
         useLibrary 'org.apache.http.legacy'
     }
+    compile 'com.squareup.retrofit2:converter-gson:2.2.0'
 }
