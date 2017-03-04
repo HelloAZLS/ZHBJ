@@ -1,8 +1,10 @@
 package com.example.administrator.zhbj.fragment;
 
 import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RadioGroup;
 
 import com.example.administrator.zhbj.R;
 import com.example.administrator.zhbj.base.BasePager;
@@ -20,8 +22,9 @@ import java.util.ArrayList;
  */
 
 public class MainFragment extends BaseFragment {
-    private NoScrollViewPager  vpMain;
+    private NoScrollViewPager vpMain;
     private ArrayList<BasePager> mPagers;
+    private RadioGroup rgGroud;
 
     @Override
     protected void initData() {
@@ -32,16 +35,57 @@ public class MainFragment extends BaseFragment {
         mPagers.add(new GovPager(mActivity));
         mPagers.add(new SettingPager(mActivity));
         vpMain.setAdapter(new MyMainAdapter());
-        ////Todo 禁用首页ViewPager的点击事件
+        rgGroud.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                switch (checkedId) {
+                    case R.id.rb_home:
+                        vpMain.setCurrentItem(0, false);
+                        break;
+                    case R.id.rb_news:
+                        vpMain.setCurrentItem(1, false);
+                        break;
+                    case R.id.rb_smart:
+                        vpMain.setCurrentItem(2, false);
+                        break;
+                    case R.id.rb_gov:
+                        vpMain.setCurrentItem(3, false);
+                        break;
+                    case R.id.rb_setting:
+                        vpMain.setCurrentItem(4, false);
+                        break;
+                }
+            }
+        });
+        vpMain.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                mPagers.get(position).initDate();
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
+        mPagers.get(0).initDate();
     }
 
     @Override
     public View initView() {
         View view = View.inflate(mActivity, R.layout.fragment_main, null);
-        vpMain = (NoScrollViewPager ) view.findViewById(R.id.vp_main);
+        vpMain = (NoScrollViewPager) view.findViewById(R.id.vp_main);
+        rgGroud = (RadioGroup) view.findViewById(R.id.rg_group);
         return view;
     }
-    class MyMainAdapter extends PagerAdapter{
+
+    class MyMainAdapter extends PagerAdapter {
 
         @Override
         public int getCount() {
@@ -50,16 +94,16 @@ public class MainFragment extends BaseFragment {
 
         @Override
         public boolean isViewFromObject(View view, Object object) {
-            return view== (View) object;
+            return view == (View) object;
         }
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
             BasePager pager = mPagers.get(position);
             View view = pager.initView();
-            pager.initDate();
+            //pager.initDate();
             container.addView(view);
-            return  view;
+            return view;
         }
 
         @Override
