@@ -56,7 +56,7 @@ public class NewsPager extends BasePager {
         }
         getDataFromServer();
     }
-
+////// TODO: 2017/3/4 侧边栏组图不会自动加载 
     public void getDataFromServer() {
         HttpUtils utils = new HttpUtils();
         utils.send(HttpRequest.HttpMethod.GET, GlobalContants.CATEGORY_URL, new RequestCallBack<String>() {
@@ -90,7 +90,7 @@ public class NewsPager extends BasePager {
         mMenuDetailPagers.add(new TopicMenuDetailPager(mActivity));
         mMenuDetailPagers.add(new PhotosMenuDetailPager(mActivity));
         mMenuDetailPagers.add(new InteractMenuDetailPager(mActivity));
-
+        setCurrentDetailPager(0);
 
     }
 

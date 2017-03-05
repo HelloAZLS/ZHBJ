@@ -25,6 +25,7 @@ public class LeftFragment extends BaseFragment {
     @ViewInject(R.id.left_lv)
     private ListView mLv;
     private  int mCurrentPos;
+    private LeftMenuAdapter adapter;
 
     private ArrayList<NewsMenuData> mNewsMenuData;
     @Override
@@ -42,7 +43,8 @@ public class LeftFragment extends BaseFragment {
     public void setMenuDate(ArrayList<NewsMenuData> data) {
         mCurrentPos=0;
         mNewsMenuData = data;
-        final LeftMenuAdapter adapter = new LeftMenuAdapter();
+
+        adapter = new LeftMenuAdapter();
         mLv.setAdapter(adapter);
 
         mLv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
