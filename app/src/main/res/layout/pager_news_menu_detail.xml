@@ -5,10 +5,27 @@
     android:baselineAligned="false"
     android:orientation="vertical">
 
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
     <com.viewpagerindicator.TabPageIndicator
         android:id="@+id/indicator"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"/>
+
+        <ImageButton
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:background="@null"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/news_cate_arr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_next"/>
+    </LinearLayout>
     <android.support.v4.view.ViewPager
         android:id="@+id/vp_new_menu_detail"
         android:layout_width="match_parent"

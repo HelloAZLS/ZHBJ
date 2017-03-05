@@ -13,6 +13,7 @@ import com.example.administrator.zhbj.domain.NewsMenu;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.lidroid.xutils.ViewUtils;
 import com.lidroid.xutils.view.annotation.ViewInject;
+import com.lidroid.xutils.view.annotation.event.OnClick;
 import com.viewpagerindicator.TabPageIndicator;
 
 import java.util.ArrayList;
@@ -116,5 +117,12 @@ public class NewsMenuDetailPager extends BaseMenuDetailPager implements ViewPage
         } else {
             slidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_NONE);
         }
+    }
+
+    @OnClick(R.id.btn_next)
+    public void nextPager(View view){
+        int currentItem = mViewPager.getCurrentItem();
+        currentItem++;
+        mViewPager.setCurrentItem(currentItem);
     }
 }
