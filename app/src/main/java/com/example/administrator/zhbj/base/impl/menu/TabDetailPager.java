@@ -6,7 +6,9 @@ import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +28,7 @@ import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
 import com.lidroid.xutils.view.annotation.ViewInject;
+import com.viewpagerindicator.CirclePageIndicator;
 
 import java.util.ArrayList;
 
@@ -36,15 +39,21 @@ import java.util.ArrayList;
  */
 
 public class TabDetailPager extends BaseMenuDetailPager {
-    private TextView view;
+    //private TextView view;
     private NewsTabData mTabData;
 
     @ViewInject(R.id.vp_top_news)
     private TopNewsViewPager mVp;
     @ViewInject(R.id.tv_top_news_title)
     private TextView tvTitle;
+    @ViewInject(R.id.indicator)
+    private CirclePageIndicator indicator;
+    @ViewInject(R.id.lv_tab)
+    private ListView mLv;
     private String mUrl;
     private ArrayList<NewsTabBean.TopNews> mTopnews;
+    private ArrayList<NewsTabBean.NewsData> mNewsList;
+    private NewsAdapter newsAdapter;
 
     public TabDetailPager(Activity mActivity, NewsTabData newsTabData) {
         super(mActivity);
@@ -62,6 +71,10 @@ public class TabDetailPager extends BaseMenuDetailPager {
         view.setGravity(Gravity.CENTER);*/
         View view = View.inflate(mActivity, R.layout.pager_tab_detail, null);
         ViewUtils.inject(this, view);
+
+        View mHeadlerView = View.inflate(mActivity,R.layout.list_item_header,null);
+        ViewUtils.inject(this,mHeadlerView);
+        mLv.addHeaderView(mHeadlerView);
         return view;
     }
 
@@ -100,9 +113,10 @@ public class TabDetailPager extends BaseMenuDetailPager {
         NewsTabBean newsTabBean = gson.fromJson(result, NewsTabBean.class);
         mTopnews = newsTabBean.data.topnews;
         if (mTopnews != null) {
-            //// TODO: 2017/3/5    没有图像出来
             mVp.setAdapter(new TopNewsAdapter());
-            mVp.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            indicator.setViewPager(mVp);
+            indicator.setSnap(true);
+            indicator.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
                 public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                     tvTitle.setText(mTopnews.get(position).title);
@@ -120,6 +134,13 @@ public class TabDetailPager extends BaseMenuDetailPager {
             });
 
             tvTitle.setText(mTopnews.get(0).title);
+            indicator.onPageSelected(0);
+        }
+
+        mNewsList = newsTabBean.data.news;
+        if (mNewsList != null) {
+            newsAdapter = new NewsAdapter();
+            mLv.setAdapter(newsAdapter);
         }
 
     }
@@ -159,5 +180,57 @@ public class TabDetailPager extends BaseMenuDetailPager {
         public void destroyItem(ViewGroup container, int position, Object object) {
             container.removeView((View) object);
         }
+    }
+
+    class NewsAdapter extends BaseAdapter {
+
+        private BitmapUtils mBitmapUtils;
+
+        public NewsAdapter() {
+            mBitmapUtils = new BitmapUtils(mActivity);
+            mBitmapUtils.configDefaultLoadingImage(R.mipmap.topnews_item_default);
+        }
+
+        @Override
+        public int getCount() {
+            return mNewsList.size();
+        }
+
+        @Override
+        public NewsTabBean.NewsData getItem(int position) {
+            return mNewsList.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder holder;
+            if (convertView == null) {
+                convertView = View.inflate(mActivity, R.layout.list_item_news, null);
+                holder = new ViewHolder();
+                holder.tvTitle = (TextView) convertView.findViewById(R.id.tv_title);
+                holder.tvDate = (TextView) convertView.findViewById(R.id.tv_date);
+                holder.ivIcon = (ImageView) convertView.findViewById(R.id.iv_icon);
+                convertView.setTag(holder);
+            }else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+            NewsTabBean.NewsData newsData = getItem(position);
+
+            holder.tvTitle.setText(newsData.title);
+            holder.tvDate.setText(newsData.pubdate);
+            mBitmapUtils.display(holder.ivIcon,newsData.listimage);
+            return convertView;
+        }
+    }
+
+    static class ViewHolder {
+        public TextView tvTitle;
+        public TextView tvDate;
+        public ImageView ivIcon;
     }
 }
