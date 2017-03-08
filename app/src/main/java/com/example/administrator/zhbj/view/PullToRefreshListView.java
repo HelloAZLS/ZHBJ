@@ -2,10 +2,12 @@ package com.example.administrator.zhbj.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
+import android.widget.AbsListView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -20,7 +22,7 @@ import java.util.Date;
  * Created by Administrator on 2017/3/8.
  */
 
-public class PullToRefreshListView extends ListView {
+public class PullToRefreshListView extends ListView implements AbsListView.OnScrollListener {
 
     private final static int STATE_PULL_TO_REFRESH = 1;
     private final static int STATE_RELEASE_REFRESH = 2;
@@ -36,20 +38,25 @@ public class PullToRefreshListView extends ListView {
     private ProgressBar mPbLoad;
     private RotateAnimation aniDowm;
     private RotateAnimation animUp;
+    private View mFootVIew;
+    private int mFootHeight;
 
     public PullToRefreshListView(Context context) {
         super(context);
         initHeaderView();
+        initFootView();
     }
 
     public PullToRefreshListView(Context context, AttributeSet attrs) {
         super(context, attrs);
         initHeaderView();
+        initFootView();
     }
 
     public PullToRefreshListView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initHeaderView();
+        initFootView();
     }
 
     private void initHeaderView() {
@@ -64,6 +71,16 @@ public class PullToRefreshListView extends ListView {
         mHeaderView.setPadding(0, -mHeight, 0, 0);
         initAnim();
         setCurrentTime();
+    }
+
+    private void initFootView() {
+        mFootVIew = View.inflate(getContext(), R.layout.pull_to_refresh_footer, null);
+
+        this.addFooterView(mFootVIew);
+        mFootVIew.measure(0, 0);
+        mFootHeight = mFootVIew.getMeasuredHeight();
+        mFootVIew.setPadding(0, -mFootHeight, 0, 0);
+        this.setOnScrollListener(this);
     }
 
     @Override
@@ -155,12 +172,18 @@ public class PullToRefreshListView extends ListView {
     }
 
     public void onRefreshComplete(Boolean success) {
-        if (success) {
+        if (!isLoadMore) {
+
             mHeaderView.setPadding(0, -mHeight, 0, 0);
             mCurrentState = STATE_PULL_TO_REFRESH;
             mPbLoad.setVisibility(View.INVISIBLE);
             mIvArrow.setVisibility(View.VISIBLE);
-            setCurrentTime();
+            if (success) {
+                setCurrentTime();
+            }
+        } else {
+            mFootVIew.setPadding(0, -mFootHeight, 0, 0);
+            isLoadMore = false;
         }
     }
 
@@ -172,5 +195,31 @@ public class PullToRefreshListView extends ListView {
 
     public interface OnRefreshListener {
         public void onRefresh();
+
+        public void onLoadMore();
+    }
+
+    private boolean isLoadMore;
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        if (scrollState == SCROLL_STATE_IDLE) {
+            int lastVisiblePosition = getLastVisiblePosition();
+            if (lastVisiblePosition == getCount() - 1 && !isLoadMore) {
+                Log.i("加载更多...", "加载更多...");
+                isLoadMore = true;
+                mFootVIew.setPadding(0, 0, 0, 0);
+                setSelection(getCount() - 1);
+                if (mListener != null) {
+                    mListener.onLoadMore();
+                }
+
+            }
+        }
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
     }
 }

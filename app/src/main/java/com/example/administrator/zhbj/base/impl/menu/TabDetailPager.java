@@ -49,11 +49,12 @@ public class TabDetailPager extends BaseMenuDetailPager {
     @ViewInject(R.id.indicator)
     private CirclePageIndicator indicator;
     @ViewInject(R.id.lv_tab)
-    private PullToRefreshListView  mLv;
+    private PullToRefreshListView mLv;
     private String mUrl;
     private ArrayList<NewsTabBean.TopNews> mTopnews;
     private ArrayList<NewsTabBean.NewsData> mNewsList;
     private NewsAdapter newsAdapter;
+    private String mMoreUrl;
 
     public TabDetailPager(Activity mActivity, NewsTabData newsTabData) {
         super(mActivity);
@@ -72,16 +73,50 @@ public class TabDetailPager extends BaseMenuDetailPager {
         View view = View.inflate(mActivity, R.layout.pager_tab_detail, null);
         ViewUtils.inject(this, view);
 
-        View mHeadlerView = View.inflate(mActivity,R.layout.list_item_header,null);
-        ViewUtils.inject(this,mHeadlerView);
+        View mHeadlerView = View.inflate(mActivity, R.layout.list_item_header, null);
+        ViewUtils.inject(this, mHeadlerView);
         mLv.addHeaderView(mHeadlerView);
         mLv.setOnRefreshListener(new PullToRefreshListView.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 getDataFromServer();
             }
+
+            @Override
+            public void onLoadMore() {
+                //加载更多数据
+                if (mMoreUrl != null) {
+                    getMoreDateFromServer();
+                } else {
+                    Toast.makeText(mActivity, "没有更多数据了", Toast.LENGTH_SHORT).show();
+                    mLv.onRefreshComplete(true);
+                }
+            }
         });
         return view;
+    }
+
+    private void getMoreDateFromServer() {
+        HttpUtils utils = new HttpUtils();
+        utils.send(HttpRequest.HttpMethod.GET, mMoreUrl, new RequestCallBack<String>() {
+
+            @Override
+            public void onSuccess(ResponseInfo<String> responseInfo) {
+                String result = responseInfo.result;
+                ProcessData(result, true);
+                CacheUtils.setCache(mUrl, mActivity, result);
+
+                mLv.onRefreshComplete(true);
+
+            }
+
+            @Override
+            public void onFailure(HttpException error, String msg) {
+                error.printStackTrace();
+                mLv.onRefreshComplete(false);
+                Toast.makeText(mActivity, msg, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
@@ -89,7 +124,7 @@ public class TabDetailPager extends BaseMenuDetailPager {
         // view.setText(mTabData.title);
         String cache = CacheUtils.getCache(mUrl, mActivity);
         if (!TextUtils.isEmpty(cache)) {
-            ProcessData(cache);
+            ProcessData(cache, false);
         }
         getDataFromServer();
     }
@@ -101,7 +136,7 @@ public class TabDetailPager extends BaseMenuDetailPager {
             @Override
             public void onSuccess(ResponseInfo<String> responseInfo) {
                 String result = responseInfo.result;
-                ProcessData(result);
+                ProcessData(result, false);
                 CacheUtils.setCache(mUrl, mActivity, result);
 
                 mLv.onRefreshComplete(true);
@@ -118,39 +153,52 @@ public class TabDetailPager extends BaseMenuDetailPager {
 
     }
 
-    private void ProcessData(String result) {
+    private void ProcessData(String result, boolean isMore) {
         Gson gson = new Gson();
         NewsTabBean newsTabBean = gson.fromJson(result, NewsTabBean.class);
-        mTopnews = newsTabBean.data.topnews;
-        if (mTopnews != null) {
-            mVp.setAdapter(new TopNewsAdapter());
-            indicator.setViewPager(mVp);
-            indicator.setSnap(true);
-            indicator.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-                @Override
-                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                    tvTitle.setText(mTopnews.get(position).title);
-                }
-
-                @Override
-                public void onPageSelected(int position) {
-
-                }
-
-                @Override
-                public void onPageScrollStateChanged(int state) {
-
-                }
-            });
-
-            tvTitle.setText(mTopnews.get(0).title);
-            indicator.onPageSelected(0);
+        String moreUrl = newsTabBean.data.more;
+        if (!TextUtils.isEmpty(moreUrl)) {
+            mMoreUrl = GlobalContants.SERVER_URL + moreUrl;
+        } else {
+            mMoreUrl = null;
         }
+        if (!isMore) {
+            mTopnews = newsTabBean.data.topnews;
 
-        mNewsList = newsTabBean.data.news;
-        if (mNewsList != null) {
-            newsAdapter = new NewsAdapter();
-            mLv.setAdapter(newsAdapter);
+            if (mTopnews != null) {
+                mVp.setAdapter(new TopNewsAdapter());
+                indicator.setViewPager(mVp);
+                indicator.setSnap(true);
+                indicator.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                    @Override
+                    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                        tvTitle.setText(mTopnews.get(position).title);
+                    }
+
+                    @Override
+                    public void onPageSelected(int position) {
+
+                    }
+
+                    @Override
+                    public void onPageScrollStateChanged(int state) {
+
+                    }
+                });
+
+                tvTitle.setText(mTopnews.get(0).title);
+                indicator.onPageSelected(0);
+            }
+
+            mNewsList = newsTabBean.data.news;
+            if (mNewsList != null) {
+                newsAdapter = new NewsAdapter();
+                mLv.setAdapter(newsAdapter);
+            }
+        } else {
+            ArrayList<NewsTabBean.NewsData> mMoewNews = newsTabBean.data.news;
+            mNewsList.addAll(mMoewNews);
+            newsAdapter.notifyDataSetChanged();
         }
 
     }
@@ -226,14 +274,14 @@ public class TabDetailPager extends BaseMenuDetailPager {
                 holder.tvDate = (TextView) convertView.findViewById(R.id.tv_date);
                 holder.ivIcon = (ImageView) convertView.findViewById(R.id.iv_icon);
                 convertView.setTag(holder);
-            }else {
+            } else {
                 holder = (ViewHolder) convertView.getTag();
             }
             NewsTabBean.NewsData newsData = getItem(position);
 
             holder.tvTitle.setText(newsData.title);
             holder.tvDate.setText(newsData.pubdate);
-            mBitmapUtils.display(holder.ivIcon,newsData.listimage);
+            mBitmapUtils.display(holder.ivIcon, newsData.listimage);
             return convertView;
         }
     }
