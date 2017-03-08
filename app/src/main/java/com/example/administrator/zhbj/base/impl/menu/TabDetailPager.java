@@ -1,11 +1,13 @@
 package com.example.administrator.zhbj.base.impl.menu;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -13,6 +15,7 @@ import android.widget.Toast;
 
 import com.example.administrator.zhbj.R;
 import com.example.administrator.zhbj.Utils.CacheUtils;
+import com.example.administrator.zhbj.Utils.PrefUtils;
 import com.example.administrator.zhbj.base.BaseMenuDetailPager;
 import com.example.administrator.zhbj.domain.NewsMenu.NewsTabData;
 import com.example.administrator.zhbj.domain.NewsTabBean;
@@ -91,6 +94,22 @@ public class TabDetailPager extends BaseMenuDetailPager {
                     Toast.makeText(mActivity, "没有更多数据了", Toast.LENGTH_SHORT).show();
                     mLv.onRefreshComplete(true);
                 }
+            }
+        });
+        mLv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int headerViewsCount = mLv.getHeaderViewsCount();
+                position = position-headerViewsCount;
+                NewsTabBean.NewsData newsData = mNewsList.get(position);
+                String readIds = PrefUtils.getString(mActivity, "read_ids", "");
+                if (!readIds.contains(newsData.id+"")){
+                    readIds = readIds+newsData.id+",";
+                    PrefUtils.setString(mActivity,"read_ids",readIds);
+                }
+                 TextView tvTitle= (TextView) view.findViewById(R.id.tv_title);
+                tvTitle.setTextColor(Color.GRAY);
+
             }
         });
         return view;
@@ -279,6 +298,12 @@ public class TabDetailPager extends BaseMenuDetailPager {
             }
             NewsTabBean.NewsData newsData = getItem(position);
 
+            String read_ids = PrefUtils.getString(mActivity, "read_ids", "");
+            if (read_ids.contains(newsData.id+"")){
+                holder.tvTitle.setTextColor(Color.GRAY);
+            }else {
+                holder.tvTitle.setTextColor(Color.BLACK);
+            }
             holder.tvTitle.setText(newsData.title);
             holder.tvDate.setText(newsData.pubdate);
             mBitmapUtils.display(holder.ivIcon, newsData.listimage);
