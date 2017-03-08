@@ -3,6 +3,7 @@ package com.example.administrator.zhbj.base;
 import android.app.Activity;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,6 +21,7 @@ public class BasePager {
     public ImageView btnMenu;
     public FrameLayout flContent;
     public View mRootView;
+    public ImageButton btnPhoto;
 
     public BasePager(Activity mActivity) {
         this.mActivity = mActivity;
@@ -31,6 +33,7 @@ public class BasePager {
         View view = View.inflate(mActivity, R.layout.base_pager, null);
         tvTitle = (TextView) view.findViewById(R.id.tv_base_title);
         btnMenu = (ImageView) view.findViewById(R.id.btn_menu);
+        btnPhoto = (ImageButton) view.findViewById(R.id.btn_photo);
         flContent = (FrameLayout) view.findViewById(R.id.fl_content);
 btnMenu.setOnClickListener(new View.OnClickListener() {
     @Override
