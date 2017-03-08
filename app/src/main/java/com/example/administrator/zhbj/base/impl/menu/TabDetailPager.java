@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,6 +17,7 @@ import com.example.administrator.zhbj.base.BaseMenuDetailPager;
 import com.example.administrator.zhbj.domain.NewsMenu.NewsTabData;
 import com.example.administrator.zhbj.domain.NewsTabBean;
 import com.example.administrator.zhbj.global.GlobalContants;
+import com.example.administrator.zhbj.view.PullToRefreshListView;
 import com.example.administrator.zhbj.view.TopNewsViewPager;
 import com.google.gson.Gson;
 import com.lidroid.xutils.BitmapUtils;
@@ -49,7 +49,7 @@ public class TabDetailPager extends BaseMenuDetailPager {
     @ViewInject(R.id.indicator)
     private CirclePageIndicator indicator;
     @ViewInject(R.id.lv_tab)
-    private ListView mLv;
+    private PullToRefreshListView  mLv;
     private String mUrl;
     private ArrayList<NewsTabBean.TopNews> mTopnews;
     private ArrayList<NewsTabBean.NewsData> mNewsList;
@@ -75,6 +75,12 @@ public class TabDetailPager extends BaseMenuDetailPager {
         View mHeadlerView = View.inflate(mActivity,R.layout.list_item_header,null);
         ViewUtils.inject(this,mHeadlerView);
         mLv.addHeaderView(mHeadlerView);
+        mLv.setOnRefreshListener(new PullToRefreshListView.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getDataFromServer();
+            }
+        });
         return view;
     }
 
@@ -97,11 +103,15 @@ public class TabDetailPager extends BaseMenuDetailPager {
                 String result = responseInfo.result;
                 ProcessData(result);
                 CacheUtils.setCache(mUrl, mActivity, result);
+
+                mLv.onRefreshComplete(true);
+
             }
 
             @Override
             public void onFailure(HttpException error, String msg) {
                 error.printStackTrace();
+                mLv.onRefreshComplete(false);
                 Toast.makeText(mActivity, msg, Toast.LENGTH_SHORT).show();
             }
         });

@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <ListView
+    <com.example.administrator.zhbj.view.PullToRefreshListView
         android:id="@+id/lv_tab"
         android:cacheColorHint="#fff"
         android:layout_width="match_parent"
