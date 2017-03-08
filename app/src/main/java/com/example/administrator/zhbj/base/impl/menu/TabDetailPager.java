@@ -1,10 +1,14 @@
 package com.example.administrator.zhbj.base.impl.menu;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -13,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.administrator.zhbj.NewsDetailActivity;
 import com.example.administrator.zhbj.R;
 import com.example.administrator.zhbj.Utils.CacheUtils;
 import com.example.administrator.zhbj.Utils.PrefUtils;
@@ -58,6 +63,7 @@ public class TabDetailPager extends BaseMenuDetailPager {
     private ArrayList<NewsTabBean.NewsData> mNewsList;
     private NewsAdapter newsAdapter;
     private String mMoreUrl;
+    private Handler handler;
 
     public TabDetailPager(Activity mActivity, NewsTabData newsTabData) {
         super(mActivity);
@@ -100,15 +106,18 @@ public class TabDetailPager extends BaseMenuDetailPager {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 int headerViewsCount = mLv.getHeaderViewsCount();
-                position = position-headerViewsCount;
+                position = position - headerViewsCount;
                 NewsTabBean.NewsData newsData = mNewsList.get(position);
                 String readIds = PrefUtils.getString(mActivity, "read_ids", "");
-                if (!readIds.contains(newsData.id+"")){
-                    readIds = readIds+newsData.id+",";
-                    PrefUtils.setString(mActivity,"read_ids",readIds);
+                if (!readIds.contains(newsData.id + "")) {
+                    readIds = readIds + newsData.id + ",";
+                    PrefUtils.setString(mActivity, "read_ids", readIds);
                 }
-                 TextView tvTitle= (TextView) view.findViewById(R.id.tv_title);
+                TextView tvTitle = (TextView) view.findViewById(R.id.tv_title);
                 tvTitle.setTextColor(Color.GRAY);
+                Intent intent = new Intent(mActivity, NewsDetailActivity.class);
+                intent.putExtra("url", newsData.url);
+                mActivity.startActivity(intent);
 
             }
         });
@@ -214,6 +223,40 @@ public class TabDetailPager extends BaseMenuDetailPager {
                 newsAdapter = new NewsAdapter();
                 mLv.setAdapter(newsAdapter);
             }
+
+            if (handler == null) {
+                handler = new Handler() {
+                    @Override
+                    public void handleMessage(Message msg) {
+                        int currentItem = mVp.getCurrentItem();
+                        currentItem++;
+                        if (currentItem > mTopnews.size() - 1) {
+                            currentItem = 0;
+                        }
+                        mVp.setCurrentItem(currentItem);
+                        handler.sendEmptyMessageDelayed(0, 3000);
+                    }
+                };
+                handler.sendEmptyMessageDelayed(0, 3000);
+
+                mVp.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        switch (event.getAction()) {
+                            case MotionEvent.ACTION_DOWN:
+                                handler.removeCallbacksAndMessages(null);
+                                break;
+                            case MotionEvent.ACTION_CANCEL:
+                                handler.sendEmptyMessageDelayed(0, 3000);
+                                break;
+                            case MotionEvent.ACTION_UP:
+                                handler.sendEmptyMessageDelayed(0, 3000);
+                                break;
+                        }
+                        return false;
+                    }
+                });
+            }
         } else {
             ArrayList<NewsTabBean.NewsData> mMoewNews = newsTabBean.data.news;
             mNewsList.addAll(mMoewNews);
@@ -299,9 +342,9 @@ public class TabDetailPager extends BaseMenuDetailPager {
             NewsTabBean.NewsData newsData = getItem(position);
 
             String read_ids = PrefUtils.getString(mActivity, "read_ids", "");
-            if (read_ids.contains(newsData.id+"")){
+            if (read_ids.contains(newsData.id + "")) {
                 holder.tvTitle.setTextColor(Color.GRAY);
-            }else {
+            } else {
                 holder.tvTitle.setTextColor(Color.BLACK);
             }
             holder.tvTitle.setText(newsData.title);
